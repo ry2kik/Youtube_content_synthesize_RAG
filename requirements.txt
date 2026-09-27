@@ -1,0 +1,38 @@
+# LangChain Core
+langchain
+langchain-core
+langchain-community
+
+# Openai Integration
+openai
+langchain-openai
+langchain-chroma
+
+# Anthropic Integration
+langchain-anthropic
+
+# Google Gemini(PaLM) Integration
+langchain-google-genai
+google-generativeai
+google-genai
+
+# HuggingFace Integration
+langchain-huggingface
+transformers
+huggingface-hub
+
+# Environment Variable Management
+python-dotenv
+
+# Additional requirements
+youtube-transcript-api
+langchain-experimental
+sentence-transformers
+langchainhub
+streamlit
+gtts
+requests
+pypdf
+pydantic
+rapidocr-onnxruntime
+watchdog
