@@ -19,8 +19,10 @@ def extract_video_id(url):
     match = re.search(r"(?:v=|/)([0-9A-Za-z_-]{11}).*", url)
     if match:
         return match.group(1)
+
     st.error('Invalid youtube URL. PLease enter a valid URl')
     return None
+
 
 # Function to get the full conversation into text
 def get_transcript(video_id, language):
@@ -33,6 +35,7 @@ def get_transcript(video_id, language):
 
     except TranscriptsDisabled:
         return "No caption available for this video"
+
 
 # Function to translate the caption into english language
 def convert_to_english(transcript):
@@ -52,14 +55,14 @@ def convert_to_english(transcript):
         )
 
         chain = prompt | openai
-        response = chain.invoke({ 'transcript': transcript })
+        response = chain.invoke({ transcript: transcript })
         return response.content
 
     except Exception as e:
         st.error(f"Error in fetching video { e }")
 
 # Function to get important topics
-def get_important_topics(transcript):
+def get_important_notes(transcript):
     try:
         prompt = ChatPromptTemplate.from_template(
             """
@@ -108,29 +111,31 @@ def genarate_notes(transcript):
     except Exception as e:
         st.error(f"Error in fetching video { e }")
 
+
 # Function to create chunks
-def create_chunks(transcript):
+def create_chunk(transcript):
     try:
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size = 10000,
-            chunk_overlap = 1000
+            chunk_size=10000,
+            chunk_overlap=1000
         )
 
         chunks = text_splitter.create_documents([transcript])
         return chunks
-
     except Exception as e:
         st.error(f"Error in creating chunks { e }")
 
+
 # Embedding Creation of chunks and storing in Chroma vector space
-def create_embeddings(chunks):
+def create_vector_store(chunks):
+    embedding = OpenAIEmbeddings(model = 'text-embedding-3-small')
     try:
-        embedding = OpenAIEmbeddings(model="text-embedding-3-small")
         vectorStore = Chroma.from_documents(chunks, embedding)
         return vectorStore
 
     except Exception as e:
-        st.error(f"Error in creating embeddings { e }")
+        st.error(f"Error in creating vector store { e }")
+
 
 # RAG Function
 def rag_answer(question, vectorStore):

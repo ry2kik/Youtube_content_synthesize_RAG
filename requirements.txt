@@ -36,3 +36,5 @@ pypdf
 pydantic
 rapidocr-onnxruntime
 watchdog
+torch 
+torchvision
