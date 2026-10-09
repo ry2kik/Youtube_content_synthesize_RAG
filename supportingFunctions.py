@@ -2,8 +2,10 @@ import re
 import time
 import streamlit as st
 from dotenv import load_dotenv
+from langchain_chroma import Chroma
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
 
 load_dotenv(override = True)
@@ -25,7 +27,7 @@ def get_transcript(video_id, language):
     transcript_api = YouTubeTranscriptApi()
     try:
         transcript_list = transcript_api.fetch(video_id, languages = [ language ])
-        full_transcript =" ".join([caption.text for caption in transcript_list.snippets])
+        full_transcript = " ".join([caption.text for caption in transcript_list.snippets])
         time.sleep(10)
         return full_transcript
 
@@ -105,3 +107,56 @@ def genarate_notes(transcript):
 
     except Exception as e:
         st.error(f"Error in fetching video { e }")
+
+# Function to create chunks
+def create_chunks(transcript):
+    try:
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size = 10000,
+            chunk_overlap = 1000
+        )
+
+        chunks = text_splitter.create_documents([transcript])
+        return chunks
+
+    except Exception as e:
+        st.error(f"Error in creating chunks { e }")
+
+# Embedding Creation of chunks and storing in Chroma vector space
+def create_embeddings(chunks):
+    try:
+        embedding = OpenAIEmbeddings(model="text-embedding-3-small")
+        vectorStore = Chroma.from_documents(chunks, embedding)
+        return vectorStore
+
+    except Exception as e:
+        st.error(f"Error in creating embeddings { e }")
+
+# RAG Function
+def rag_answer(question, vectorStore):
+    try:
+        results = vectorStore.similarity_search(question, k = 4)
+        context_text = "\n".join([doc.page_content for doc in results])
+
+        prompt = ChatPromptTemplate.from_template(
+            """
+                You are a kind, polite and precise assistant.
+                - Begin with a warm and respectful greeting (Avoid repeating greetings in every turn)
+                - Understand the user's intent even with typos or grammadical mistakes.
+                - Answer only using the retrieved context.
+                - If answer not in context, say "I'm sorry, I don't have information on that topic. Could you please rephrase it or ask something else?"
+                - Keep answers short, clear, friendly and concise.
+                
+                context: {context_text}
+                User's question: {question}
+
+                Answer:
+            """
+        )
+
+        chain = prompt | openai
+        response = chain.invoke({ 'context': context_text, 'question': question })
+        return response.content
+
+    except Exception as e:
+        st.error(f"Error in RAG answer { e }")

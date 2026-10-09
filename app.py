@@ -11,7 +11,7 @@ with st.sidebar:
     st.title('VidSync AI')
     st.markdown('---')
     st.markdown('Transform any Youtube videos into key topics, a podcast, or a chatbot')
-    st.markdown('### Input Details')
+    st.markdown('## Input Details')
     
     # Input Variables
     youtube_url = st.text_input('Youtube URL', placeholder = 'https://www.youtube.com/watch?v=......')
