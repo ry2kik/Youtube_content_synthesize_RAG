@@ -152,7 +152,7 @@ def rag_answer(question, vectorStore):
                 - If answer not in context, say "I'm sorry, I don't have information on that topic. Could you please rephrase it or ask something else?"
                 - Keep answers short, clear, friendly and concise.
                 
-                context: {context_text}
+                Context: {context_text}
                 User's question: {question}
 
                 Answer:
@@ -160,7 +160,7 @@ def rag_answer(question, vectorStore):
         )
 
         chain = prompt | openai
-        response = chain.invoke({ 'context': context_text, 'question': question })
+        response = chain.invoke({ 'context_text': context_text, 'question': question })
         return response.content
 
     except Exception as e:

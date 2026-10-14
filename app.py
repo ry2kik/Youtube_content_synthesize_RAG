@@ -5,7 +5,10 @@ from supportingFunctions import (
     extract_video_id,
     genarate_notes,
     get_important_notes,
-    get_transcript
+    get_transcript,
+    create_chunk,
+    create_vector_store,
+    rag_answer
 )
 
 with st.sidebar:
@@ -51,3 +54,34 @@ if submit_button:
                     st.write(notes)
 
                 st.success('Summary and notes genarated.')
+
+            if task_options == 'Chat with Video':
+                with st.spinner('2/3: Creating chunks and vector store....'):
+                    chunk = create_chunk(full_transcript)
+                    vector_store = create_vector_store(chunk)
+                    st.session_state.vector_store = vector_store
+
+                st.session_state.messages = []
+                st.success('Video is ready for chat...')
+
+# Chatbot Session
+if task_options == 'Chat with Video' and 'vector_store' in st.session_state:
+    st.divider()
+    st.subheader('Chat with Video')
+
+    # Display the entire history
+    for message in st.session_state.get('messages', []):
+        with st.chat_message(message['role']):
+            st.write(message['content'])
+
+    # User Prompt
+    prompt = st.chat_input('Ask me anything about this video')
+    if prompt:
+        st.session_state.messages.append({ 'role': 'user', 'content': prompt })
+        with st.chat_message('user'):
+            st.write(prompt)
+
+        with st.chat_message('assistant'):
+            response = rag_answer(prompt, st.session_state.vector_store)
+            st.write(response)
+        st.session_state.messages.append({ 'role': 'assistent', 'content': response })
