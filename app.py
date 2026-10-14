@@ -1,3 +1,9 @@
+# --- THIS MUST BE THE FIRST THING IN THE SCRIPT ---
+__import__('pysqlite3')
+import sys
+sys.module['sqlite3] = sys.modules.pop('pysqlite3')
+# --- END OF THE FIX ---
+
 import streamlit as st
 
 from supportingFunctions import (
