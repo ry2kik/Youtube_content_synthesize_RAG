@@ -35,6 +35,7 @@ requests
 pypdf
 pydantic
 rapidocr-onnxruntime
+pysqlite3-binary
 watchdog
 torch 
 torchvision
